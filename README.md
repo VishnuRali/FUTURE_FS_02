@@ -6,7 +6,7 @@
 
 ## 🔗 Live Demo
 
-> [<https://futuree-fs-02.netlify.app/>](https://client-lead-management-system-minicrm.netlify.app/)
+> https://client-lead-management-system-minicrm.netlify.app/
 
 ---
 
