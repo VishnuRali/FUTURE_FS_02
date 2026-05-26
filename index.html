@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadFlow CRM | Client Lead Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Lead<span>Flow</span> CRM</div>
+    <div class="login-sub">Sign in to your admin dashboard</div>
+    <div class="login-err" id="login-err">Invalid credentials. Try admin / admin123</div>
+    <label class="login-label">Username</label>
+    <input class="login-input" id="l-user" type="text" placeholder="admin" autocomplete="username">
+    <label class="login-label">Password</label>
+    <input class="login-input" id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-hint">Demo: admin / admin123</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo"><div class="dot"></div> LeadFlow</div>
+      <button class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span> Dashboard</button>
+      <button class="nav-item" onclick="showPage('leads',this)"><span class="nav-icon">👥</span> All Leads</button>
+      <button class="nav-item" onclick="showPage('new-leads',this)"><span class="nav-icon">🆕</span> New Leads</button>
+      <button class="nav-item" onclick="showPage('contacted',this)"><span class="nav-icon">📞</span> Contacted</button>
+      <button class="nav-item" onclick="showPage('converted',this)"><span class="nav-icon">✅</span> Converted</button>
+      <div class="sidebar-bottom">
+        <button class="logout-btn" onclick="doLogout()">⬅ Logout</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <!-- DASHBOARD PAGE -->
+      <div class="page active" id="page-dashboard">
+        <div class="topbar">
+          <div class="page-title">Dashboard</div>
+          <button class="add-btn" onclick="openModal()">+ Add Lead</button>
+        </div>
+        <div class="stats-row" id="dash-stats"></div>
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="dash-card-title">Lead Pipeline</div>
+            <div class="pipeline-bar" id="pipeline-bar"></div>
+            <div class="pipeline-legend" id="pipeline-legend"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-title">Recent Leads</div>
+            <div id="recent-leads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALL LEADS PAGE -->
+      <div class="page" id="page-leads">
+        <div class="topbar">
+          <div class="page-title">All Leads</div>
+          <div style="display:flex;gap:0.75rem">
+            <button class="add-btn" style="background:var(--converted);color:#fff" onclick="exportCSV()">⬇ Export CSV</button>
+            <button class="add-btn" onclick="openModal()">+ Add Lead</button>
+          </div>
+        </div>
+        <div class="filters">
+          <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+          <button class="filter-btn" onclick="setFilter('new',this)">New</button>
+          <button class="filter-btn" onclick="setFilter('contacted',this)">Contacted</button>
+          <button class="filter-btn" onclick="setFilter('converted',this)">Converted</button>
+          <input class="search-box" id="search-box" placeholder="🔍  Search leads..." oninput="renderTable()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th><th>Source</th><th>Status</th><th>Date Added</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="leads-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- NEW LEADS PAGE -->
+      <div class="page" id="page-new-leads">
+        <div class="topbar">
+          <div class="page-title">New Leads</div>
+          <button class="add-btn" onclick="openModal()">+ Add Lead</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Source</th><th>Date Added</th><th>Actions</th></tr></thead>
+            <tbody id="new-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONTACTED PAGE -->
+      <div class="page" id="page-contacted">
+        <div class="topbar"><div class="page-title">Contacted</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Source</th><th>Date Added</th><th>Actions</th></tr></thead>
+            <tbody id="contacted-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONVERTED PAGE -->
+      <div class="page" id="page-converted">
+        <div class="topbar"><div class="page-title">Converted</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Source</th><th>Date Added</th><th>Actions</th></tr></thead>
+            <tbody id="converted-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ADD / EDIT LEAD MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Add New Lead</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input class="form-input" id="f-name" placeholder="John Doe">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email *</label>
+        <input class="form-input" id="f-email" type="email" placeholder="john@example.com">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input class="form-input" id="f-phone" placeholder="+91 9876543210">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Source</label>
+        <select class="form-select" id="f-source">
+          <option value="Website">Website</option>
+          <option value="LinkedIn">LinkedIn</option>
+          <option value="Referral">Referral</option>
+          <option value="Cold Outreach">Cold Outreach</option>
+          <option value="Social Media">Social Media</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="f-status">
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="converted">Converted</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Company</label>
+        <input class="form-input" id="f-company" placeholder="Company name">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Initial Note</label>
+      <textarea class="form-textarea" id="f-note" placeholder="Any notes about this lead..."></textarea>
+    </div>
+
+    <!-- Notes panel (shown only when editing) -->
+    <div class="notes-section" id="notes-section" style="display:none">
+      <div class="notes-title">Follow-up Notes</div>
+      <div id="notes-list"></div>
+      <div class="note-input-row">
+        <input class="note-input" id="note-input" placeholder="Add a follow-up note...">
+        <button class="note-add-btn" onclick="addNote()">Add</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveLead()">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
